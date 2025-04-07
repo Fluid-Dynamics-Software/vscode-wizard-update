@@ -114,7 +114,7 @@ export function createOrShowWizardWithPaths(
     // Located at the extension root folder under wizardtemplates/<webview id>/style.css
     //const extURI = context.extensionUri;
     //const extensionUri: vscode.Uri = panel.webview.asWebviewUri(extURI);
-    const extensionUriString = pagesWebviewUri.toString() + '../../../../wizardtemplates/' + id + '/style.css';
+    const extensionUriString = pagesWebviewUri.toString() + '/../../../../wizardtemplates/' + id + '/style.css';
     const contentsWithCSS = contentsReplaced.split('{{style}}').join(extensionUriString.toString());
 
     panel.webview.html = contentsWithCSS;
