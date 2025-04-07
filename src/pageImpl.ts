@@ -104,7 +104,12 @@ export function createOrShowWizardWithPaths(
     panel = vscode.window.createWebviewPanel(viewType, title, vscode.ViewColumn.One, {
       enableScripts: true,
       retainContextWhenHidden: true,
-      localResourceRoots: [context.extensionUri, rootPathUri],
+      localResourceRoots: [
+        context.extensionUri,
+        rootPathUri,
+        vscode.Uri.joinPath(context.extensionUri, 'resources', 'accela'),
+        vscode.Uri.joinPath(context.extensionUri, 'resources', 'accela', 'images'),
+      ],
     });
     const pagesWebviewUri: vscode.Uri = panel.webview.asWebviewUri(rootPathUri);
     const contents: string = fs.readFileSync(pagePath, 'utf-8');
