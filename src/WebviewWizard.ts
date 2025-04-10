@@ -2,8 +2,8 @@ import { Wizard } from './Wizard';
 import { IWizard } from './IWizard';
 import { IWizardPage } from './IWizardPage';
 import * as vscode from 'vscode';
-import { MessageMapping, Template, HandlerResponse, AsyncMessageCallback } from "./pageImpl";
-import { createOrShowWizard, disposeWizard, sendInitialData, updatePanelTitle } from "./pageImpl";
+import { MessageMapping, Template, HandlerResponse, AsyncMessageCallback } from './pageImpl';
+import { createOrShowWizard, disposeWizard, sendInitialData, updatePanelTitle } from './pageImpl';
 import { WebviewWizardPage } from './WebviewWizardPage';
 import { IWizardWorkflowManager, PerformFinishResponse } from './IWizardWorkflowManager';
 import { IWizardPageRenderer } from './IWizardPageRenderer';
@@ -27,8 +27,13 @@ export class WebviewWizard extends Wizard implements IWizard {
   initialData: Map<string, string>;
   isDirty: boolean = false;
 
-  constructor(id: string, type: string, context2: vscode.ExtensionContext,
-    definition: WizardDefinition, initialData: Map<string, string>) {
+  constructor(
+    id: string,
+    type: string,
+    context2: vscode.ExtensionContext,
+    definition: WizardDefinition,
+    initialData: Map<string, string>,
+  ) {
     super();
     this.initialData = initialData;
     this.definition = definition;
@@ -40,51 +45,51 @@ export class WebviewWizard extends Wizard implements IWizard {
 
     this.context = context2;
     this.readyMapping = {
-      command: "ready",
+      command: 'ready',
       asyncHandler: async (callback: AsyncMessageCallback, parameters: any): Promise<void> => {
         // Get templates for the first page content and validation result
         await this.fireCurrentPageInitialTemplates(callback, parameters);
         await this.createAndPostValidationTemplates(callback, parameters);
-      }
+      },
     };
 
     this.nextPressedMapping = {
-      command: "nextPressed",
+      command: 'nextPressed',
       asyncHandler: async (callback: AsyncMessageCallback, parameters: any): Promise<void> => {
         this.nextImpl(callback, parameters);
-      }
+      },
     };
 
     this.backPressedMapping = {
-      command: "backPressed",
+      command: 'backPressed',
       asyncHandler: async (callback: AsyncMessageCallback, parameters: any): Promise<void> => {
         this.backImpl(callback, parameters);
-      }
+      },
     };
 
     this.finishPressedMapping = {
-      command: "finishPressed",
+      command: 'finishPressed',
       asyncHandler: async (callback: AsyncMessageCallback, parameters: any): Promise<void> => {
         await callback.call(null, await this.finishImpl(parameters));
-      }
+      },
     };
 
     this.openFileDialogMapping = {
-      command: "openFileDialog",
+      command: 'openFileDialog',
       asyncHandler: async (callback: AsyncMessageCallback, parameters: any): Promise<void> => {
         await callback.call(null, await this.openFileDialogMappingImpl(parameters));
-      }
-    }
+      },
+    };
 
     this.validateMapping = {
-      command: "validate",
+      command: 'validate',
       asyncHandler: async (callback: AsyncMessageCallback, parameters: any): Promise<void> => {
         if (!this.isDirty) {
           this.isDirty = true;
           this.updateWizardPanelTitle();
         }
         await this.createAndPostValidationTemplates(callback, parameters);
-      }
+      },
     };
   }
 
@@ -109,10 +114,8 @@ export class WebviewWizard extends Wizard implements IWizard {
     let previousPage: IWizardPage | null = null;
     if (this.currentPage === null) {
       previousPage = this.getStartingPage();
-    } else if (this.definition.workflowManager !== undefined
-      && this.definition.workflowManager.getPreviousPage) {
-      previousPage = this.definition.workflowManager.getPreviousPage(
-        this.currentPage, data === undefined ? {} : data);
+    } else if (this.definition.workflowManager !== undefined && this.definition.workflowManager.getPreviousPage) {
+      previousPage = this.definition.workflowManager.getPreviousPage(this.currentPage, data === undefined ? {} : data);
     } else {
       previousPage = this.getPreviousPage(this.currentPage);
     }
@@ -122,10 +125,8 @@ export class WebviewWizard extends Wizard implements IWizard {
     let nextPage: IWizardPage | null = null;
     if (this.currentPage === null) {
       nextPage = this.getStartingPage();
-    } else if (this.definition.workflowManager !== undefined
-      && this.definition.workflowManager.getNextPage) {
-      nextPage = this.definition.workflowManager.getNextPage(
-        this.currentPage, data === undefined ? {} : data);
+    } else if (this.definition.workflowManager !== undefined && this.definition.workflowManager.getNextPage) {
+      nextPage = this.definition.workflowManager.getNextPage(this.currentPage, data === undefined ? {} : data);
     } else {
       nextPage = this.getNextPage(this.currentPage);
     }
@@ -141,12 +142,12 @@ export class WebviewWizard extends Wizard implements IWizard {
 
   public templatesToHandlerResponse(templates: Template[], focus: boolean): HandlerResponse {
     const retObj: any = {};
-    if( focus ) {
-      retObj["focusedField"] = this.currentPage?.getFocusedField();
+    if (focus) {
+      retObj['focusedField'] = this.currentPage?.getFocusedField();
     }
     const ret: HandlerResponse = {
       returnObject: retObj,
-      templates: templates
+      templates: templates,
     };
     return ret;
   }
@@ -157,6 +158,7 @@ export class WebviewWizard extends Wizard implements IWizard {
     // Get templates for the next page content and validation result
     await this.fireCurrentPageInitialTemplates(callback, parameters);
     await this.createAndPostValidationTemplates(callback, parameters);
+    debugger;
   }
 
   async finishImpl(data: any): Promise<HandlerResponse> {
@@ -168,7 +170,7 @@ export class WebviewWizard extends Wizard implements IWizard {
       this.close();
       return {
         returnObject: {},
-        templates: []
+        templates: [],
       };
     } else {
       if (resp.close) {
@@ -190,7 +192,7 @@ export class WebviewWizard extends Wizard implements IWizard {
 
       return {
         returnObject: resp.returnObject,
-        templates: templatesToReturn
+        templates: templatesToReturn,
       };
     }
   }
@@ -201,14 +203,14 @@ export class WebviewWizard extends Wizard implements IWizard {
     return {
       returnObject: {
         fieldId: data.fieldId,
-        fsPath: result && result[0]?.fsPath
-      }
-    }
+        fsPath: result && result[0]?.fsPath,
+      },
+    };
   }
 
   updateWizardPanelTitle() {
     const dirty = this.showDirtyState(this.definition);
-    updatePanelTitle(this.id, this.title + (dirty ? " ●" : ""));
+    updatePanelTitle(this.id, this.title + (dirty ? ' ●' : ''));
   }
   close(): void {
     disposeWizard(this.id);
@@ -219,16 +221,16 @@ export class WebviewWizard extends Wizard implements IWizard {
    * It WILL validate the page.
    * It WILL NOT include field validation in the templates sent to webview.
    * It WILL use the validation to update button bars.
-   * 
-   * This function should only be called when a new page is first loaded, 
+   *
+   * This function should only be called when a new page is first loaded,
    * either via the 'ready', 'next', or 'back' mappings.
-   * 
-   * @param callback 
-   * @param parameters 
+   *
+   * @param callback
+   * @param parameters
    */
   async fireCurrentPageInitialTemplates(callback: AsyncMessageCallback, parameters: any): Promise<void> {
     const templates = this.getCurrentPageHeadingsTemplates(parameters);
-    templates.push({ id: "content", content: this.getCurrentPageContent(parameters) });
+    templates.push({ id: 'content', content: this.getCurrentPageContent(parameters) });
     await callback.call(null, this.templatesToHandlerResponse(templates, true));
     await callback.call(null, this.templatesToHandlerResponse([this.getDisabledWizardControlsTemplates()], true));
   }
@@ -236,85 +238,101 @@ export class WebviewWizard extends Wizard implements IWizard {
   getCurrentPageHeadingsTemplates(parameters: any): Template[] {
     let ret: Template[] = [];
     if (this.definition.hideWizardHeader === true) {
-      ret.push({ id: "wizardHeader", content: "&nbsp;" });
+      ret.push({ id: 'wizardHeader', content: '&nbsp;' });
     } else {
-      ret.push({ id: "wizardHeader", content: this.getDefaultWizardHeader() });
-      ret.push({ id: "wizardTitle", content: this.title });
-      ret.push({ id: "wizardDescription", content: this.description === undefined ? "" : this.description });
+      ret.push({ id: 'wizardHeader', content: this.getDefaultWizardHeader() });
+      ret.push({ id: 'wizardTitle', content: this.title });
+      ret.push({ id: 'wizardDescription', content: this.description === undefined ? '' : this.description });
       if (this.imageString !== undefined) {
-        ret.push({ id: "wizardBanner", content: this.imageString })
+        ret.push({ id: 'wizardBanner', content: this.imageString });
       }
     }
 
     if (this.getCurrentPage() !== null) {
       let pageDef: WizardPageDefinition | undefined = this.getCurrentPage()?.getPageDefinition();
       if (pageDef?.hideWizardPageHeader === true) {
-        ret.push({ id: "wizardPageHeader", content: "&nbsp;" });
+        ret.push({ id: 'wizardPageHeader', content: '&nbsp;' });
       } else {
-        ret.push({ id: "wizardPageHeader", content: this.getDefaultWizardPageHeader() });
-        ret.push({ id: "pageTitle", content: this.getCurrentPageName() });
-        ret.push({ id: "pageDescription", content: this.getCurrentPageDescription() === undefined ? "" : this.getCurrentPageDescription() });
+        ret.push({ id: 'wizardPageHeader', content: this.getDefaultWizardPageHeader() });
+        ret.push({ id: 'pageTitle', content: this.getCurrentPageName() });
+        ret.push({
+          id: 'pageDescription',
+          content: this.getCurrentPageDescription() === undefined ? '' : this.getCurrentPageDescription(),
+        });
       }
     }
     return ret;
   }
 
   getDefaultWizardHeader(): string {
-    return '<div id="wizardBanner"></div>\n' +
+    return (
+      '<div id="wizardBanner"></div>\n' +
       '<h2 id="wizardTitle" class="section__title section__title--primary"></h2>\n' +
-      '<p id="wizardDescription" class="blurb ml-0 mr-0"></p>\n';
+      '<p id="wizardDescription" class="blurb ml-0 mr-0"></p>\n'
+    );
   }
   getDefaultWizardPageHeader(): string {
-    return '<h2 id="pageTitle" class="section__title section__title--primary"></h2>\n' +
+    return (
+      '<h2 id="pageTitle" class="section__title section__title--primary"></h2>\n' +
       '<p id="pageDescription" class="blurb ml-0 mr-0"></p>\n' +
-      '<hr />\n';
+      '<hr />\n'
+    );
   }
 
-  async fireValidationTemplatesForCurrentPage(callback: AsyncMessageCallback, parameters: any, previousParams: any): Promise<void> {
+  async fireValidationTemplatesForCurrentPage(
+    callback: AsyncMessageCallback,
+    parameters: any,
+    previousParams: any,
+  ): Promise<void> {
     const cp = this.getCurrentPage();
-    if( cp )
-      cp.firePageValidationTemplates(callback, parameters, previousParams);
+    if (cp) cp.firePageValidationTemplates(callback, parameters, previousParams);
   }
 
   getCurrentPageName(): string | undefined {
-    return (this.currentPage === null ? "" : this.currentPage.getName());
+    return this.currentPage === null ? '' : this.currentPage.getName();
   }
   getCurrentPageId(): string {
-    return (this.currentPage === null ? "" : this.currentPage.getId());
+    return this.currentPage === null ? '' : this.currentPage.getId();
   }
 
   getCurrentPageDescription(): string | undefined {
-    return (this.currentPage === null ? "" : this.currentPage.getDescription());
+    return this.currentPage === null ? '' : this.currentPage.getDescription();
   }
 
   getCurrentPageContent(parameters: any): string {
     const page: WebviewWizardPage | null = this.getCurrentPage();
-    if (page === null) { return ""; }
-    return page.getContentAsHTML(parameters);
+    if (page === null) {
+      return '';
+    }
+		let content = page.getContentAsHTML(parameters);
+		
+    return content;
   }
 
   getCurrentPage(): WebviewWizardPage | null {
     const cur: IWizardPage | null = super.getPage(this.getCurrentPageId());
-    if (cur instanceof WebviewWizardPage) { return cur; }
+    if (cur instanceof WebviewWizardPage) {
+      return cur;
+    }
     return null;
   }
 
   open(): void {
     super.open();
     this.currentPage = this.getStartingPage();
-    createOrShowWizard(
-      this.id,
-      this.type,
-      this.title,
-      this.context,
-      [this.readyMapping, this.validateMapping, this.backPressedMapping,
-      this.nextPressedMapping, this.finishPressedMapping, this.openFileDialogMapping]
-    );
+    createOrShowWizard(this.id, this.type, this.title, this.context, [
+      this.readyMapping,
+      this.validateMapping,
+      this.backPressedMapping,
+      this.nextPressedMapping,
+      this.finishPressedMapping,
+      this.openFileDialogMapping,
+    ]);
 
     // organize initial data
     const fieldsData = new Map<string, string>();
     for (const page of this.definition.pages) {
-      page.fields.forEach(definition => {
+      page.fields.forEach((definition) => {
         if (isWizardPageSectionDefinition(definition)) {
           for (const child of definition.childFields) {
             if (child.initialValue != undefined) {
@@ -342,51 +360,50 @@ export class WebviewWizard extends Wizard implements IWizard {
     return this.getButtonBarHtml(parameters);
   }
   getUpdatedWizardControlsTemplate(parameters: any): Template {
-    return { id: "wizardControls", content: this.getButtonBarHtml(parameters) };
+    return { id: 'wizardControls', content: this.getButtonBarHtml(parameters) };
   }
-  
+
   async fireUpdatedButtonBar(callback: AsyncMessageCallback, parameters: any) {
     const buttonBar = this.getUpdatedWizardControlsTemplate(parameters);
     await callback.call(null, this.templatesToHandlerResponse([buttonBar], false));
   }
 
   getButtonBarHtml(parameters: any): string {
-    let hasPrevious = (this.currentPage !== null &&
-      this.getActualPreviousPage(this.currentPage) !== null);
+    let hasPrevious = this.currentPage !== null && this.getActualPreviousPage(this.currentPage) !== null;
 
-    let hasNext = (this.currentPage !== null && this.currentPage.isPageComplete() &&
-      this.getActualNextPage(parameters) !== null);
-    let canFinishNow: boolean = this.currentPage !== null && this.currentPage.isPageComplete() && this.canFinishInternal(parameters);
+    let hasNext = this.currentPage !== null && this.currentPage.isPageComplete() && this.getActualNextPage(parameters) !== null;
+    let canFinishNow: boolean =
+      this.currentPage !== null && this.currentPage.isPageComplete() && this.canFinishInternal(parameters);
     return this.getButtonBarHtmlImpl(hasPrevious, hasNext, canFinishNow);
   }
   getDisabledWizardControlsHtml(): string {
     return this.getButtonBarHtmlImpl(false, false, false);
   }
   getDisabledWizardControlsTemplates(): Template {
-    return { id: "wizardControls", content: this.getDisabledWizardControlsHtml() };
+    return { id: 'wizardControls', content: this.getDisabledWizardControlsHtml() };
   }
   getButtonBarHtmlImpl(hasPrevious: boolean, hasNext: boolean, canFinishNow: boolean): string {
-    let ret: string = "";
+    let ret: string = '';
     if (this.definition.buttons) {
       for (let button of this.definition.buttons) {
         if (button.id == BUTTONS.PREVIOUS) {
-          ret = ret + createButton("buttonBack", "backPressed()", hasPrevious, button.label);
+          ret = ret + createButton('buttonBack', 'backPressed()', hasPrevious, button.label);
         }
         if (button.id == BUTTONS.NEXT) {
-          ret = ret + createButton("buttonNext", "nextPressed()", hasNext, button.label)
+          ret = ret + createButton('buttonNext', 'nextPressed()', hasNext, button.label);
         }
         if (button.id == BUTTONS.FINISH) {
-          ret = ret + createButton("buttonFinish", "finishPressed()", canFinishNow, button.label);
+          ret = ret + createButton('buttonFinish', 'finishPressed()', canFinishNow, button.label);
         }
       }
     } else {
-      ret = createButton("buttonBack", "backPressed()", hasPrevious, "Back") +
-        createButton("buttonNext", "nextPressed()", hasNext, "Next") +
-        createButton("buttonFinish", "finishPressed()", canFinishNow, "Finish");
+      ret =
+        createButton('buttonBack', 'backPressed()', hasPrevious, 'Back') +
+        createButton('buttonNext', 'nextPressed()', hasNext, 'Next') +
+        createButton('buttonFinish', 'finishPressed()', canFinishNow, 'Finish');
     }
     return ret;
   }
-
 
   showDirtyState(def: WizardDefinition): boolean {
     return def.showDirtyState !== undefined && def.showDirtyState && this.isDirty;
@@ -396,10 +413,10 @@ export class WebviewWizard extends Wizard implements IWizard {
 export function createButton(id: string | undefined, onclick: string | undefined, enabled: boolean, text: string): string {
   return `<button type="button"
                   class="vscode-button"
-                  ${id ? `id="${id}"` : ""}
-                  ${onclick ? `onclick="${onclick}"` : ""}
-                  ${enabled ? "" : " disabled"}>${text}</button>
-          `
+                  ${id ? `id="${id}"` : ''}
+                  ${onclick ? `onclick="${onclick}"` : ''}
+                  ${enabled ? '' : ' disabled'}>${text}</button>
+          `;
 }
 export type WizardPageValidator = (parameters: any, previousParameters?: any) => ValidatorResponse;
 export type AsyncWizardPageValidator = (parameters: any, previousParameters: any) => Promise<ValidatorResponse>[];
@@ -409,15 +426,15 @@ export interface WizardPageFieldOptionLabelProvider {
   getItems(parameters?: any): any;
   getValueItem?(item: any): string;
   getLabelItem(item: any): string;
-};
+}
 
-export const UPDATE_TITLE: string = "vscode-wizard/updateWizardTitle";
+export const UPDATE_TITLE: string = 'vscode-wizard/updateWizardTitle';
 
 export enum SEVERITY {
   OTHER = 1,
   INFO = 2,
   WARN = 3,
-  ERROR = 4
+  ERROR = 4,
 }
 
 export enum BUTTONS {
@@ -427,22 +444,22 @@ export enum BUTTONS {
 }
 
 export interface ButtonItem {
-  id: BUTTONS,
-  label: string
+  id: BUTTONS;
+  label: string;
 }
 
 export interface ValidatorResponseItem {
   template: Template;
-  severity: SEVERITY
+  severity: SEVERITY;
 }
 
 export interface ValidatorResponse {
-  items: ValidatorResponseItem[],
+  items: ValidatorResponseItem[];
   fieldRefresh?: Map<string, FieldDefinitionState>;
 }
 
 export interface CompoundValidatorResponse {
-  syncResponse: ValidatorResponse,
+  syncResponse: ValidatorResponse;
   asyncResponses: Promise<ValidatorResponse>[];
 }
 
@@ -454,8 +471,8 @@ export interface WizardDefinition {
   pages: WizardPageDefinition[];
   workflowManager?: IWizardWorkflowManager;
   renderer?: IWizardPageRenderer;
-  buttons?: ButtonItem[],
-  showDirtyState?: boolean
+  buttons?: ButtonItem[];
+  showDirtyState?: boolean;
 }
 
 export interface WizardPageDefinition {
@@ -472,15 +489,19 @@ export interface WizardPageSectionDefinition {
   id: string;
   label: string;
   description?: string;
-  childFields: WizardPageFieldDefinition[]
+  childFields: WizardPageFieldDefinition[];
 }
 
-export function isWizardPageSectionDefinition(def: WizardPageFieldDefinition | WizardPageSectionDefinition): def is WizardPageSectionDefinition {
-  return (def as any).childFields !== undefined
+export function isWizardPageSectionDefinition(
+  def: WizardPageFieldDefinition | WizardPageSectionDefinition,
+): def is WizardPageSectionDefinition {
+  return (def as any).childFields !== undefined;
 }
 
-export function isWizardPageFieldDefinition(def: WizardPageFieldDefinition | WizardPageSectionDefinition): def is WizardPageFieldDefinition {
-  return (def as any).type !== undefined
+export function isWizardPageFieldDefinition(
+  def: WizardPageFieldDefinition | WizardPageSectionDefinition,
+): def is WizardPageFieldDefinition {
+  return (def as any).type !== undefined;
 }
 
 export interface WizardPageFieldDefinition {
@@ -489,9 +510,9 @@ export interface WizardPageFieldDefinition {
   label: string;
   description?: string;
   initialValue?: string;
-  placeholder?: string,
+  placeholder?: string;
   // focus:  true if the field must got the focus and false otherwise.
-  focus?: boolean,
+  focus?: boolean;
   // executableJavascriptOnModification:  this name is intentionally long so as to avoid confusion
   executableJavascriptOnModification?: string;
   properties?: any;
@@ -501,7 +522,7 @@ export interface WizardPageFieldDefinition {
 }
 
 export interface FieldDefinitionState {
-  enabled?: boolean,
-  visible?: boolean,
-  forceRefresh?: boolean,
+  enabled?: boolean;
+  visible?: boolean;
+  forceRefresh?: boolean;
 }

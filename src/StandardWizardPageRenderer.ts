@@ -10,6 +10,9 @@ import {
 } from './WebviewWizard';
 import { IWizardPageRenderer } from './IWizardPageRenderer';
 import { WizardPageFieldOptionProvider } from '.';
+const fs = require('fs');
+const path = require('path');
+const vscode = require('vscode');
 
 export const DATA_PROPERTY_INSIDE_SECTION = 'vscode-wizard.section.inside';
 
@@ -45,6 +48,38 @@ export class StandardWizardPageRenderer implements IWizardPageRenderer {
       } else if (isWizardPageFieldDefinition(field)) {
         htmlContent += this.wrapOneFieldAsString(field, data, this.oneFieldAsString(field, data));
       }
+    }
+
+    //let panel = currentPanels.get(wizardName);
+    htmlContent += this.loadCustomTemplates(definition);
+    return htmlContent;
+  }
+
+  loadCustomTemplates(definition: WizardPageDefinition): string {
+    let pageId = definition.id;
+    let wizardName = 'newAccelaProject'; //definition.wizardName;
+    let htmlContent = '';
+    const templatesPath = path.join(__dirname, 'wizardtemplates', wizardName);
+
+    const htmlFilePath = path.join(templatesPath, pageId + '.html');
+    const jsFilePath = path.join(templatesPath, pageId + '.js');
+    const cssFilePath = path.join(templatesPath, pageId + '.css');
+
+    if (fs.existsSync(htmlFilePath)) {
+      htmlContent += fs.readFileSync(htmlFilePath, 'utf8');
+    }
+
+    if (fs.existsSync(jsFilePath)) {
+      htmlContent += `<script>${fs.readFileSync(jsFilePath, 'utf8')}</script>`;
+    }
+
+    if (fs.existsSync(cssFilePath)) {
+      htmlContent += `<style>${fs.readFileSync(cssFilePath, 'utf8')}</style>`;
+    }
+    try {
+    } catch (error) {
+      vscode.window.showErrorMessage(`Error loading templates for wizard: ${wizardName}, page: ${pageId}. Details: ${error}`);
+      console.error(`Error loading templates for wizard: ${wizardName}, page: ${pageId}`, error);
     }
     return htmlContent;
   }
