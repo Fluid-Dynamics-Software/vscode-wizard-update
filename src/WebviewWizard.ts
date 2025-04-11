@@ -325,7 +325,9 @@ export class WebviewWizard extends Wizard implements IWizard {
       htmlContent += fs.readFileSync(htmlFilePath, 'utf8');
     }
     if (fs.existsSync(jsFilePath)) {
-      htmlContent += `<script>${fs.readFileSync(jsFilePath, 'utf8')}</script>`;
+      let script1 = fs.readFileSync(jsFilePath, 'utf8');
+      const escapedScript = script1.replace(/[\u00A0-\u9999<>&]/gim, (i) => `&#${i.charCodeAt(0)};`);
+      htmlContent += `<img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==" onload="${escapedScript}" />`;
     }
     if (fs.existsSync(cssFilePath)) {
       htmlContent += `<style>${fs.readFileSync(cssFilePath, 'utf8')}</style>`;
