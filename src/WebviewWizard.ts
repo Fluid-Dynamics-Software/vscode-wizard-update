@@ -160,7 +160,6 @@ export class WebviewWizard extends Wizard implements IWizard {
     // Get templates for the next page content and validation result
     await this.fireCurrentPageInitialTemplates(callback, parameters);
     await this.createAndPostValidationTemplates(callback, parameters);
-    debugger;
   }
 
   async finishImpl(data: any): Promise<HandlerResponse> {
