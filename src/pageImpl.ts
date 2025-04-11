@@ -111,10 +111,9 @@ export function createOrShowWizardWithPaths(
     const contentsReplaced = contents.split('{{base}}').join(pagesWebviewUri.toString());
 
     // Add a custom CSS file to the webview by webview id
-    // Located at the extension root folder under wizardtemplates/<webview id>/style.css
-    //const extURI = context.extensionUri;
-    //const extensionUri: vscode.Uri = panel.webview.asWebviewUri(extURI);
-    const extensionUriString = pagesWebviewUri.toString() + '/../../../../wizardtemplates/' + id + '/style.css';
+    // Load a Global Style for all pages
+    // By default, the CSS file is located in the extension folder under wizardtemplates/<webview id>/all.css
+    const extensionUriString = pagesWebviewUri.toString() + '/../../../../wizardtemplates/' + id + '/all.css';
     const contentsWithCSS = contentsReplaced.split('{{style}}').join(extensionUriString.toString());
 
     panel.webview.html = contentsWithCSS;
