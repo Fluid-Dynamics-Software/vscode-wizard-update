@@ -7,6 +7,8 @@ import { createOrShowWizard, disposeWizard, sendInitialData, updatePanelTitle } 
 import { WebviewWizardPage } from './WebviewWizardPage';
 import { IWizardWorkflowManager, PerformFinishResponse } from './IWizardWorkflowManager';
 import { IWizardPageRenderer } from './IWizardPageRenderer';
+import path from 'path';
+import * as fs from 'fs';
 
 export class WebviewWizard extends Wizard implements IWizard {
   context: vscode.ExtensionContext;
@@ -304,11 +306,38 @@ export class WebviewWizard extends Wizard implements IWizard {
     if (page === null) {
       return '';
     }
-		let content = page.getContentAsHTML(parameters);
-		
+    let content = page.getContentAsHTML(parameters);
+    content += this.loadCustomTemplates(page.getPageDefinition());
     return content;
   }
 
+  loadCustomTemplates(definition: WizardPageDefinition): string {
+    if (!definition) {
+      throw new Error('Definition is undefined or null');
+    }
+    let pageId = definition.id;
+    let wizardName = this.id; //definition.wizardName;
+    let htmlContent = '';
+    const templatesPath = path.join(this.context.extensionUri.fsPath, 'wizardtemplates', wizardName);
+    const htmlFilePath = path.join(templatesPath, pageId + '.html');
+    const jsFilePath = path.join(templatesPath, pageId + '.js');
+    const cssFilePath = path.join(templatesPath, pageId + '.css');
+    if (fs.existsSync(htmlFilePath)) {
+      htmlContent += fs.readFileSync(htmlFilePath, 'utf8');
+    }
+    if (fs.existsSync(jsFilePath)) {
+      htmlContent += `<script>${fs.readFileSync(jsFilePath, 'utf8')}</script>`;
+    }
+    if (fs.existsSync(cssFilePath)) {
+      htmlContent += `<style>${fs.readFileSync(cssFilePath, 'utf8')}</style>`;
+    }
+    try {
+    } catch (error) {
+      vscode.window.showErrorMessage(`Error loading templates for wizard: ${wizardName}, page: ${pageId}. Details: ${error}`);
+      console.error(`Error loading templates for wizard: ${wizardName}, page: ${pageId}`, error);
+    }
+    return htmlContent;
+  }
   getCurrentPage(): WebviewWizardPage | null {
     const cur: IWizardPage | null = super.getPage(this.getCurrentPageId());
     if (cur instanceof WebviewWizardPage) {
