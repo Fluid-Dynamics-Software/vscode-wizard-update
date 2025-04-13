@@ -4,3 +4,4 @@ out
 *.vsix
 *.tgz
 *.log
+.DS_Store
