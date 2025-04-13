@@ -10,9 +10,9 @@ import {
 } from './WebviewWizard';
 import { IWizardPageRenderer } from './IWizardPageRenderer';
 import { WizardPageFieldOptionProvider } from '.';
-const fs = require('fs');
-const path = require('path');
-const vscode = require('vscode');
+import fs from 'fs';
+import path from 'path';
+import vscode from 'vscode';
 
 export const DATA_PROPERTY_INSIDE_SECTION = 'vscode-wizard.section.inside';
 
